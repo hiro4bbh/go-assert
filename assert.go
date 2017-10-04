@@ -42,8 +42,8 @@ type HookedTestingTB struct {
 func NewHookedTestingTB(name string) *HookedTestingTB {
 	return &HookedTestingTB{
 		Messages: []string{},
-		Helpers: []string{},
-		name: name,
+		Helpers:  []string{},
+		name:     name,
 	}
 }
 
@@ -53,7 +53,7 @@ func (tb *HookedTestingTB) Error(args ...interface{}) {
 }
 
 func (tb *HookedTestingTB) Errorf(format string, args ...interface{}) {
-	tb.Logf("ERROR: " + format, args...)
+	tb.Logf("ERROR: "+format, args...)
 	tb.Fail()
 }
 
@@ -77,7 +77,7 @@ func (tb *HookedTestingTB) Fatal(args ...interface{}) {
 }
 
 func (tb *HookedTestingTB) Fatalf(format string, args ...interface{}) {
-	tb.Logf("FATAL: " + format, args...)
+	tb.Logf("FATAL: "+format, args...)
 	tb.FailNow()
 }
 

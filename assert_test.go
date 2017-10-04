@@ -106,7 +106,7 @@ func TestAssertEqual(t *testing.T) {
 	New(tb2).Equal()
 	New(tb2, "hello").Equal("hello")
 	New(tb2, "hello", "world").Equal("hello", "world")
-	New(tb2, "hello", "world").Equal(func () (string, string) {
+	New(tb2, "hello", "world").Equal(func() (string, string) {
 		return "hello", "world"
 	}())
 	if tb2.Failed() {
@@ -121,7 +121,8 @@ func TestAssertEqual(t *testing.T) {
 	New(tb3, "hello", "world").Equal("hell", "w0rld")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3).Equal("hello")
 	}()
@@ -149,7 +150,7 @@ func TestAssertEqualWithoutError(t *testing.T) {
 	tb2 := NewHookedTestingTB("test2")
 	New(tb2, "hello").EqualWithoutError("hello", error(nil))
 	New(tb2, "hello", "world").EqualWithoutError("hello", "world", error(nil))
-	New(tb2, "hello", "world").EqualWithoutError(func () (string, string, error) {
+	New(tb2, "hello", "world").EqualWithoutError(func() (string, string, error) {
 		return "hello", "world", nil
 	}())
 	if tb2.Failed() {
@@ -164,7 +165,8 @@ func TestAssertEqualWithoutError(t *testing.T) {
 	New(tb3, "hello", "world").EqualWithoutError("hell", "w0rld", error(nil))
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3).EqualWithoutError("hello", fmt.Errorf("w0rld"))
 	}()
@@ -182,7 +184,8 @@ func TestAssertEqualWithoutError(t *testing.T) {
 	tb4 := NewHookedTestingTB("test4")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb4).EqualWithoutError(error(nil))
 	}()
@@ -206,7 +209,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb2 := NewHookedTestingTB("test2")
 	New(tb2).ExpectError(fmt.Errorf("hello"))
 	New(tb2, "world").ExpectError("hello", fmt.Errorf("world"))
-	New(tb2, "!").ExpectError(func () (string, string, error) {
+	New(tb2, "!").ExpectError(func() (string, string, error) {
 		return "hello", "world", fmt.Errorf("!")
 	}())
 	if tb2.Failed() {
@@ -219,7 +222,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_1 := NewHookedTestingTB("test3_1")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_1).ExpectError()
 	}()
@@ -232,7 +236,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_2 := NewHookedTestingTB("test3_2")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_2).ExpectError("hello", "world")
 	}()
@@ -245,7 +250,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_3 := NewHookedTestingTB("test3_3")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_3).ExpectError(error(nil))
 	}()
@@ -258,7 +264,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_4 := NewHookedTestingTB("test3_4")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_4, "hello", "world").ExpectError(fmt.Errorf("hello"))
 	}()
@@ -271,7 +278,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_5 := NewHookedTestingTB("test3_5")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_5, 0xdeadbeef).ExpectError(fmt.Errorf("hello"))
 	}()
@@ -284,7 +292,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_6 := NewHookedTestingTB("test3_6")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_6, "hello[").ExpectError(fmt.Errorf("hello"))
 	}()
@@ -297,7 +306,8 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_7 := NewHookedTestingTB("test3_6")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3_7, "hello").ExpectError(fmt.Errorf("hell0"))
 	}()
@@ -332,7 +342,8 @@ func TestAssertSucceedNew(t *testing.T) {
 	tb3 := NewHookedTestingTB("test3")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3).SucceedNew("hello", fmt.Errorf("world"))
 	}()
@@ -365,7 +376,8 @@ func TestAssertSucceedWithoutError(t *testing.T) {
 	tb3 := NewHookedTestingTB("test3")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {}
+			if o := recover(); o != nil {
+			}
 		}()
 		New(tb3).SucceedWithoutError(fmt.Errorf("hello"))
 	}()
