@@ -14,82 +14,94 @@ func TestTestingTB(t *testing.T) {
 	New(tb)
 }
 
-func TestHookedTestingTB(t *testing.T) {
-	// test1: only normal uses
-	tb1 := NewHookedTestingTB("test1")
-	if name := tb1.Name(); "test1" != name {
-		t.Fatalf("test1: unexpected %q returned by Name()", "test1", name)
+func TestHookedTestingTBNormalUse(t *testing.T) {
+	// Only normal uses
+	tb := NewHookedTestingTB("test")
+	if expected, got := "test", tb.Name(); expected != got {
+		t.Fatalf("test: expected %q, but got %q returned by Name()", expected, got)
 	}
-	tb1.Log("hello", "world")
-	tb1.Logf("%s %s!", "hello", "world")
-	tb1.Helper()
-	if failed := tb1.Failed(); failed {
-		t.Fatalf("test1: unexpected Failed() == true")
+	tb.Log("hello", "world")
+	tb.Logf("%s %s!", "hello", "world")
+	tb.Helper()
+	if failed := tb.Failed(); failed {
+		t.Fatalf("test: unexpected Failed() == true")
 	}
-	if !reflect.DeepEqual(tb1.Messages, []string{"helloworld", "hello world!"}) {
-		t.Fatalf("test1: unexpected Messages: %#v", tb1.Messages)
+	if !reflect.DeepEqual(tb.Messages, []string{"helloworld", "hello world!"}) {
+		t.Fatalf("test: unexpected Messages: %#v", tb.Messages)
 	}
-	if !(len(tb1.Helpers) == 1 && strings.HasSuffix(tb1.Helpers[0], "assert_test.go:25")) {
-		t.Fatalf("test1: unexpected Helpers: %#v", tb1.Helpers)
+	if !(len(tb.Helpers) == 1 && strings.HasSuffix(tb.Helpers[0], "assert_test.go:25")) {
+		t.Fatalf("test: unexpected Helpers: %#v", tb.Helpers)
 	}
-	// test2: Error should not prevent the following execution
-	tb2 := NewHookedTestingTB("test2")
-	tb2.Error("hell", "world")
-	if failed := tb2.Failed(); !failed {
-		t.Fatalf("test2: unexpected Failed() == false")
+}
+
+func TestHookedTestingTBContinueAfterError(t *testing.T) {
+	// Error should not prevent the following execution
+	tb := NewHookedTestingTB("test")
+	tb.Error("hell", "world")
+	if failed := tb.Failed(); !failed {
+		t.Fatalf("test: unexpected Failed() == false")
 	}
-	tb2.Logf("%s %s!!", "hell", "world")
-	if failed := tb2.Failed(); !failed {
-		t.Fatalf("test2: unexpected Failed() == false")
+	tb.Logf("%s %s!!", "hell", "world")
+	if failed := tb.Failed(); !failed {
+		t.Fatalf("test: unexpected Failed() == false")
 	}
-	if !reflect.DeepEqual(tb2.Messages, []string{"ERROR: hellworld", "hell world!!"}) {
-		t.Fatalf("test2: unexpected Messages: %#v", tb2.Messages)
+	if !reflect.DeepEqual(tb.Messages, []string{"ERROR: hellworld", "hell world!!"}) {
+		t.Fatalf("test: unexpected Messages: %#v", tb.Messages)
 	}
-	// test3: Error and Errorf should not prevent the following execution
-	tb3 := NewHookedTestingTB("test3")
-	tb3.Errorf("%s %s!!", "hell", "world")
-	if failed := tb3.Failed(); !failed {
-		t.Fatalf("test3: unexpected Failed() == false")
+}
+
+func TestHookedTestingTBContinueAfterErrorf(t *testing.T) {
+	// Error and Errorf should not prevent the following execution
+	tb := NewHookedTestingTB("test")
+	tb.Errorf("%s %s!!", "hell", "world")
+	if failed := tb.Failed(); !failed {
+		t.Fatalf("test: unexpected Failed() == false")
 	}
-	tb3.Logf("%s %s!!", "hell", "world")
-	if !reflect.DeepEqual(tb3.Messages, []string{"ERROR: hell world!!", "hell world!!"}) {
-		t.Fatalf("test3: unexpected Messages: %#v", tb3.Messages)
+	tb.Logf("%s %s!!", "hell", "world")
+	if !reflect.DeepEqual(tb.Messages, []string{"ERROR: hell world!!", "hell world!!"}) {
+		t.Fatalf("test: unexpected Messages: %#v", tb.Messages)
 	}
-	// test4: Fatal should prevent the following execution
-	tb4 := NewHookedTestingTB("test4")
-	var tb4_panic interface{}
+}
+
+func TestHookedTestingTBFatalPreventsExecution(t *testing.T) {
+	// Fatal should prevent the following execution
+	tb := NewHookedTestingTB("test")
+	var panicObj interface{}
 	func() {
 		defer func() {
-			tb4_panic = recover()
+			panicObj = recover()
 		}()
-		tb4.Fatal("HELL", "WORLD")
+		tb.Fatal("HELL", "WORLD")
 	}()
-	if tb4_panicStr, ok := tb4_panic.(string); !(ok && tb4_panicStr == "HookedTestingTB(\"test4\"): FAIL NOW") {
-		t.Fatalf("test4: unexpected panic message: %s", tb4_panic)
+	if panicStr, ok := panicObj.(string); !(ok && panicStr == "HookedTestingTB(\"test\"): FAIL NOW") {
+		t.Fatalf("test: unexpected panic message: %s", panicObj)
 	}
-	if failed := tb4.Failed(); !failed {
-		t.Fatalf("test4: unexpected Failed() == false")
+	if failed := tb.Failed(); !failed {
+		t.Fatalf("test: unexpected Failed() == false")
 	}
-	if !reflect.DeepEqual(tb4.Messages, []string{"FATAL: HELLWORLD"}) {
-		t.Fatalf("test4: unexpected Messages: %#v", tb4.Messages)
+	if !reflect.DeepEqual(tb.Messages, []string{"FATAL: HELLWORLD"}) {
+		t.Fatalf("test: unexpected Messages: %#v", tb.Messages)
 	}
-	// test5: Fatalf should prevent the following execution
-	tb5 := NewHookedTestingTB("test5")
-	var tb5_panic interface{}
+}
+
+func TestHookedTestingTBFatalfPreventsExecution(t *testing.T) {
+	// Fatalf should prevent the following execution
+	tb := NewHookedTestingTB("test")
+	var panicObj interface{}
 	func() {
 		defer func() {
-			tb5_panic = recover()
+			panicObj = recover()
 		}()
-		tb5.Fatalf("%s %s!!!", "HELL", "WORLD")
+		tb.Fatalf("%s %s!!!", "HELL", "WORLD")
 	}()
-	if tb5_panicStr, ok := tb5_panic.(string); !(ok && tb5_panicStr == "HookedTestingTB(\"test5\"): FAIL NOW") {
-		t.Fatalf("test5: unexpected panic message: %s", tb5_panic)
+	if panicStr, ok := panicObj.(string); !(ok && panicStr == "HookedTestingTB(\"test\"): FAIL NOW") {
+		t.Fatalf("test: unexpected panic message: %s", panicObj)
 	}
-	if failed := tb5.Failed(); !failed {
-		t.Fatalf("test5: unexpected Failed() == false")
+	if failed := tb.Failed(); !failed {
+		t.Fatalf("test: unexpected Failed() == false")
 	}
-	if !reflect.DeepEqual(tb5.Messages, []string{"FATAL: HELL WORLD!!!"}) {
-		t.Fatalf("test5: unexpected Messages: %#v", tb5.Messages)
+	if !reflect.DeepEqual(tb.Messages, []string{"FATAL: HELL WORLD!!!"}) {
+		t.Fatalf("test: unexpected Messages: %#v", tb.Messages)
 	}
 }
 

@@ -25,7 +25,6 @@ type TestingTB interface {
 
 // HookedTestingTB implements TestingTB.
 // This is designed to be used in testing test frameworks.
-// See TestingTB for details if methods are not documented.
 type HookedTestingTB struct {
 	// Messages is the slice of the logged messages.
 	Messages []string
@@ -47,53 +46,63 @@ func NewHookedTestingTB(name string) *HookedTestingTB {
 	}
 }
 
+// Error is for interface TestingTB.
 func (tb *HookedTestingTB) Error(args ...interface{}) {
 	tb.Log(append([]interface{}{"ERROR: "}, args...)...)
 	tb.Fail()
 }
 
+// Errorf is for interface TestingTB.
 func (tb *HookedTestingTB) Errorf(format string, args ...interface{}) {
 	tb.Logf("ERROR: "+format, args...)
 	tb.Fail()
 }
 
+// Fail is for interface TestingTB.
 func (tb *HookedTestingTB) Fail() {
 	tb.failed = true
 }
 
-// FailNow panics for stopping the current test execution.
+// FailNow is for interface TestingTB.
 func (tb *HookedTestingTB) FailNow() {
 	tb.Fail()
 	panic(fmt.Sprintf("HookedTestingTB(%q): FAIL NOW", tb.name))
 }
 
+// Failed is for interface TestingTB.
 func (tb *HookedTestingTB) Failed() bool {
 	return tb.failed
 }
 
+// Fatal is for interface TestingTB.
 func (tb *HookedTestingTB) Fatal(args ...interface{}) {
 	tb.Log(append([]interface{}{"FATAL: "}, args...)...)
 	tb.FailNow()
 }
 
+// Fatalf is for interface TestingTB.
 func (tb *HookedTestingTB) Fatalf(format string, args ...interface{}) {
 	tb.Logf("FATAL: "+format, args...)
 	tb.FailNow()
 }
 
+// Helper is for interface TestingTB.
 func (tb *HookedTestingTB) Helper() {
 	_, file, line, _ := runtime.Caller(1)
 	tb.Helpers = append(tb.Helpers, fmt.Sprintf("%s:%d", file, line))
 }
 
+// Log is for interface TestingTB.
 func (tb *HookedTestingTB) Log(args ...interface{}) {
 	tb.Messages = append(tb.Messages, fmt.Sprint(args...))
 }
 
+// Logf is for interface TestingTB.
 func (tb *HookedTestingTB) Logf(format string, args ...interface{}) {
 	tb.Messages = append(tb.Messages, fmt.Sprintf(format, args...))
 }
 
+// Name is for interface TestingTB.
 func (tb *HookedTestingTB) Name() string {
 	return tb.name
 }
@@ -104,7 +113,7 @@ type Assert struct {
 	expected []interface{}
 }
 
-// NewAssert returns a new Assert with the testing context and the expected values.
+// New returns a new Assert with the testing context and the expected values.
 func New(tb TestingTB, expected ...interface{}) *Assert {
 	return &Assert{
 		tb:       tb,
@@ -134,16 +143,16 @@ func (assert *Assert) Equal(actual ...interface{}) {
 }
 
 // EqualWithoutError checks that the given actual values equals the expected values without any error.
-func (assert *Assert) EqualWithoutError(actual_err ...interface{}) {
+func (assert *Assert) EqualWithoutError(actualErr ...interface{}) {
 	assert.tb.Helper()
-	if len(actual_err) < 2 {
+	if len(actualErr) < 2 {
 		assert.tb.Fatalf("actual_err must be at least two: (actual..., err)")
 	}
-	err := actual_err[len(actual_err)-1]
+	err := actualErr[len(actualErr)-1]
 	if err != nil {
 		assert.tb.Fatalf("unexpected error: %s", err)
 	}
-	assert.Equal(actual_err[0 : len(actual_err)-1]...)
+	assert.Equal(actualErr[0 : len(actualErr)-1]...)
 }
 
 // ExpectError checks that the error is returned expectedly.
@@ -181,7 +190,7 @@ func (assert *Assert) ExpectError(_err ...interface{}) {
 	}
 }
 
-// SuccessNew checks that New-style function succeeds without any error.
+// SucceedNew checks that New-style function succeeds without any error.
 func (assert *Assert) SucceedNew(o interface{}, err error) interface{} {
 	assert.tb.Helper()
 	if err != nil {
@@ -190,7 +199,7 @@ func (assert *Assert) SucceedNew(o interface{}, err error) interface{} {
 	return o
 }
 
-// SuccessWithoutError check that the function succeeds without any error.
+// SucceedWithoutError check that the function succeeds without any error.
 func (assert *Assert) SucceedWithoutError(err error) {
 	assert.tb.Helper()
 	if err != nil {
