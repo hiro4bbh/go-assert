@@ -190,6 +190,25 @@ func (assert *Assert) ExpectError(_err ...interface{}) {
 	}
 }
 
+// ExpectPanic checks that panic is called at least once.
+// The expected values must be one expected object passed to panic.
+func (assert *Assert) ExpectPanic(callback func()) {
+	assert.tb.Helper()
+	v := func() (v interface{}) {
+		defer func() {
+			v = recover()
+		}()
+		callback()
+		return nil
+	}()
+	if len(assert.expected) != 1 {
+		assert.tb.Fatalf("the number of the expected objects must be one")
+	}
+	if !reflect.DeepEqual(assert.expected[0], v) {
+		assert.tb.Errorf("expected %#v (%T), but got %#v (%T)", assert.expected[0], assert.expected[0], v, v)
+	}
+}
+
 // SucceedNew checks that New-style function succeeds without any error.
 func (assert *Assert) SucceedNew(o interface{}, err error) interface{} {
 	assert.tb.Helper()

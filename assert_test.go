@@ -133,8 +133,7 @@ func TestAssertEqual(t *testing.T) {
 	New(tb3, "hello", "world").Equal("hell", "w0rld")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3).Equal("hello")
 	}()
@@ -177,8 +176,7 @@ func TestAssertEqualWithoutError(t *testing.T) {
 	New(tb3, "hello", "world").EqualWithoutError("hell", "w0rld", error(nil))
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3).EqualWithoutError("hello", fmt.Errorf("w0rld"))
 	}()
@@ -196,8 +194,7 @@ func TestAssertEqualWithoutError(t *testing.T) {
 	tb4 := NewHookedTestingTB("test4")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb4).EqualWithoutError(error(nil))
 	}()
@@ -234,8 +231,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_1 := NewHookedTestingTB("test3_1")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_1).ExpectError()
 	}()
@@ -248,8 +244,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_2 := NewHookedTestingTB("test3_2")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_2).ExpectError("hello", "world")
 	}()
@@ -262,8 +257,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_3 := NewHookedTestingTB("test3_3")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_3).ExpectError(error(nil))
 	}()
@@ -276,8 +270,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_4 := NewHookedTestingTB("test3_4")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_4, "hello", "world").ExpectError(fmt.Errorf("hello"))
 	}()
@@ -290,8 +283,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_5 := NewHookedTestingTB("test3_5")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_5, 0xdeadbeef).ExpectError(fmt.Errorf("hello"))
 	}()
@@ -304,8 +296,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_6 := NewHookedTestingTB("test3_6")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_6, "hello[").ExpectError(fmt.Errorf("hello"))
 	}()
@@ -318,8 +309,7 @@ func TestAssertExpectError(t *testing.T) {
 	tb3_7 := NewHookedTestingTB("test3_6")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3_7, "hello").ExpectError(fmt.Errorf("hell0"))
 	}()
@@ -328,6 +318,55 @@ func TestAssertExpectError(t *testing.T) {
 	}
 	if !reflect.DeepEqual(tb3_7.Messages, []string{"FATAL: expected error pattern \"hello\", but got error \"hell0\""}) {
 		t.Fatalf("test3_7: unexpected Messages: %#v", tb3_7.Messages)
+	}
+}
+
+func TestAssertExpectPanic(t *testing.T) {
+	// test1: Test helper registration
+	tb1 := NewHookedTestingTB("test1")
+	New(tb1, "hello").ExpectPanic(func() {
+		panic("hello")
+	})
+	// NOTICE: We cannot identify the location of any helper exactly, because of go cover tool inserts some code into source code files.
+	if len(tb1.Helpers) != 1 {
+		t.Fatalf("test1: unexpected Helpers: %#v", tb1.Helpers)
+	}
+	// test2: only normal uses
+	tb2 := NewHookedTestingTB("test2")
+	New(tb2, "hello").ExpectPanic(func() {
+		panic("hello")
+	})
+	if tb2.Failed() {
+		t.Fatalf("test2: unexpected Failed() == true")
+	}
+	if len(tb2.Messages) != 0 {
+		t.Fatalf("test2: unexpected Messages: %#v", tb2.Messages)
+	}
+	// test3: fatal exit case
+	tb3 := NewHookedTestingTB("test3")
+	New(tb3, "hello!").ExpectPanic(func() {
+		panic("hello")
+	})
+	if !tb3.Failed() {
+		t.Fatalf("test3: unexpected Failed() == false")
+	}
+	if !reflect.DeepEqual(tb3.Messages, []string{"ERROR: expected \"hello!\" (string), but got \"hello\" (string)"}) {
+		t.Fatalf("test3: unexpected Messages: %#v", tb3.Messages)
+	}
+	tb4 := NewHookedTestingTB("test4")
+	func() {
+		defer func() {
+			recover()
+		}()
+		New(tb4).ExpectPanic(func() {
+			panic("hello")
+		})
+	}()
+	if !tb4.Failed() {
+		t.Fatalf("test4: unexpected Failed() == false")
+	}
+	if !reflect.DeepEqual(tb4.Messages, []string{"FATAL: the number of the expected objects must be one"}) {
+		t.Fatalf("test4: unexpected Messages: %#v", tb4.Messages)
 	}
 }
 
@@ -354,8 +393,7 @@ func TestAssertSucceedNew(t *testing.T) {
 	tb3 := NewHookedTestingTB("test3")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3).SucceedNew("hello", fmt.Errorf("world"))
 	}()
@@ -377,7 +415,7 @@ func TestAssertSucceedWithoutError(t *testing.T) {
 	}
 	// test2: only normal uses
 	tb2 := NewHookedTestingTB("test2")
-	New(tb1).SucceedWithoutError(error(nil))
+	New(tb2).SucceedWithoutError(error(nil))
 	if tb2.Failed() {
 		t.Fatalf("test2: unexpected Failed() == true")
 	}
@@ -388,8 +426,7 @@ func TestAssertSucceedWithoutError(t *testing.T) {
 	tb3 := NewHookedTestingTB("test3")
 	func() {
 		defer func() {
-			if o := recover(); o != nil {
-			}
+			recover()
 		}()
 		New(tb3).SucceedWithoutError(fmt.Errorf("hello"))
 	}()
